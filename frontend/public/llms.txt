@@ -1,0 +1,33 @@
+# ContLinks — Guest Post & Link Building Marketplace
+
+## What is ContLinks?
+ContLinks is a professional two-sided marketplace connecting advertisers (link buyers) with publishers (website owners) for high-quality guest posting, sponsored content, and link building campaigns.
+
+## Core Capabilities
+- **Catalogue**: Browse thousands of publisher websites filtered by niche, DA, traffic, price, and language.
+- **Order Management**: Place, track, and manage guest post and link placement orders end-to-end.
+- **Projects**: Advertisers can organise link building campaigns under named projects.
+- **My Portals**: Publishers list and manage their own websites, set pricing, and track incoming orders.
+- **Wallet**: Deposit funds, withdraw earnings, and review full transaction history.
+- **Messages**: Real-time messaging between advertisers and publishers for content co-ordination.
+- **Notifications**: Instant alerts for new orders, status changes, payments, and system events.
+- **Support**: Ticket-based support centre with live chat widget.
+- **Earnings Charts**: Visual dashboards for revenue trends, order volumes, and QA statistics.
+
+## User Roles
+- **Advertiser**: Buys guest posts and link placements; manages projects, catalogue shopping, purchases, and cart checkout.
+- **Publisher**: Sells placements on own websites; manages portals, incoming orders, and earnings.
+
+## Tech Stack
+- React 18, TypeScript, Vite, Tailwind CSS
+- Zustand for state management
+- Recharts for data visualisation
+- Radix UI primitives (accessible components)
+- React Router DOM for routing
+
+## Deployment
+Live URL: https://contlinks.com
+Sitemap: https://contlinks.com/sitemap.xml
+
+## Intended Audience
+Digital marketers, SEO professionals, content marketing managers, link builders, bloggers, and website owners looking to monetise their traffic or scale their backlink acquisition.

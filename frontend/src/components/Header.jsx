@@ -1,0 +1,368 @@
+import {
+  BellIcon,
+  MessageSquareIcon,
+  MenuIcon,
+  WalletIcon,
+  RepeatIcon,
+  ShoppingCartIcon,
+  HeartIcon,
+  GlobeIcon,
+  UserIcon,
+  LogOutIcon,
+  ArrowDownCircleIcon,
+  ArrowUpCircleIcon,
+  ClockIcon,
+  CreditCardIcon,
+  LockIcon,
+  HourglassIcon
+} from
+  "lucide-react";
+
+import { useWindowSize } from "../hooks/use-mobile";
+import { useDashboardStore } from "@/stores/dashboardStore";
+import { useUserStore } from "@/stores/userStore";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from
+  "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from
+  "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { NotificationsList } from "@/components/notifications/NotificationsList";
+
+import { useNotificationStore } from "@/stores/notificationStore";
+import { useWalletStore } from "@/stores/walletStore";
+
+import { toast } from "sonner";
+
+
+
+
+
+
+
+
+
+
+
+export function Header({
+  onProfileClick,
+  onCartClick,
+  onMessagesClick,
+  onWalletClick,
+  onPaymentAccountsClick,
+  onFavoritesClick,
+  onLogout
+}) {
+  const { sidebarCollapsed, toggleMobileMenu } = useDashboardStore();
+  const { unreadCount } = useNotificationStore();
+  const { role, switchRole } = useUserStore();
+  const { isMobile } = useWindowSize();
+  const { onHoldAmount, awaitingClearanceAmount } = useWalletStore();
+  const { user } = useUserStore();
+  console.log("USER IN HEADER:", user);
+  const handleRoleSwitch = () => {
+    const newRole = role === "advertiser" ? "publisher" : "advertiser";
+
+    // 1. clear auth
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // 2. update role in store
+    switchRole(newRole);
+
+    toast.success(`Switched to ${newRole}. Please login again 👋`);
+
+    setTimeout(() => {
+      onLogout(); // App-level logout
+    }, 500);
+  };
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    toast.success("Logged out successfully 👋");
+
+    setTimeout(() => {
+      onLogout(); // App-level logout
+    }, 500);
+  };
+  return (
+    <header
+      className="fixed top-0 right-0 h-14 sm:h-16 bg-card border-b border-border z-30 transition-all duration-300"
+      style={{ left: isMobile ? "0px" : sidebarCollapsed ? "80px" : "240px" }}>
+
+      <div className="flex items-center justify-between h-full px-3 sm:px-4 md:px-6 gap-2 sm:gap-4">
+        {/* Left: Mobile menu toggle + Mobile brand */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMobileMenu}
+            className="lg:hidden flex-shrink-0 bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground w-8 h-8"
+            aria-label="Toggle mobile menu">
+
+            <MenuIcon className="w-5 h-5" />
+          </Button>
+          {/* Mobile brand name */}
+          <span className="lg:hidden text-base font-semibold text-foreground truncate">
+            Dashboard
+          </span>
+          <div className="hidden lg:flex flex-1" />
+        </div>
+
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground w-8 h-8 sm:w-9 sm:h-9"
+                aria-label="Notifications">
+
+                <BellIcon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
+                {unreadCount > 0 &&
+                  <Badge className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 bg-warning text-warning-foreground text-[10px] sm:text-xs">
+                    {unreadCount}
+                  </Badge>
+                }
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] sm:w-[320px] p-0" align="end">
+              <NotificationsList />
+            </PopoverContent>
+          </Popover>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground w-8 h-8 sm:w-9 sm:h-9"
+            aria-label="Messages"
+            onClick={onMessagesClick}>
+
+            <MessageSquareIcon
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              strokeWidth={1.5} />
+
+            <Badge className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 bg-blue-500 text-white text-[10px] sm:text-xs">
+              12
+            </Badge>
+          </Button>
+
+          {/* Cart and Favorites - Only for Advertiser */}
+          {role === "advertiser" &&
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground w-8 h-8 sm:w-9 sm:h-9"
+                aria-label="Shopping Cart"
+                onClick={onCartClick}>
+
+                <ShoppingCartIcon
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  strokeWidth={1.5} />
+
+                <Badge className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 bg-primary text-primary-foreground text-[10px] sm:text-xs">
+                  5
+                </Badge>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative hidden sm:inline-flex bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground w-8 h-8 sm:w-9 sm:h-9"
+                aria-label="Favorites"
+                onClick={onFavoritesClick}>
+
+                <HeartIcon
+                  className="w-4 h-4 sm:w-5 sm:h-5"
+                  strokeWidth={1.5} />
+
+                <Badge className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 bg-red-500 text-white text-[10px] sm:text-xs">
+                  5
+                </Badge>
+              </Button>
+            </>
+          }
+
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="relative bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3 flex items-center gap-1.5"
+                aria-label="Wallet">
+
+                <WalletIcon
+                  className="w-4 h-4 flex-shrink-0 text-muted-foreground"
+                  strokeWidth={1.5} />
+
+                <span
+                  className="hidden sm:inline text-[13px] font-semibold text-foreground tracking-tight"
+                  style={{
+                    fontFamily: "'Outfit', 'Inter', system-ui, sans-serif",
+                    fontVariantNumeric: "tabular-nums",
+                    letterSpacing: "0.02em"
+                  }}>
+
+                  $12,450.00
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-56 p-1 bg-popover border border-border shadow-md rounded-lg">
+
+              {/* On Hold / Awaiting Clearance row */}
+              {role === "advertiser" ?
+                <div className="flex items-center justify-between px-2 py-1.5 mx-1 mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <LockIcon className="w-3 h-3 text-foreground/60 flex-shrink-0" />
+                    <span className="text-[11px] text-foreground/75 font-medium">
+                      On Hold:
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-foreground tabular-nums tracking-tight">
+                    $
+                    {onHoldAmount.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </span>
+                </div> :
+
+                <div className="flex items-center justify-between px-2 py-1.5 mx-1 mb-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <HourglassIcon className="w-3 h-3 text-foreground/60 flex-shrink-0" />
+                    <span className="text-[11px] text-foreground/75 font-medium whitespace-nowrap">
+                      Awaiting Clearance:
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-foreground tabular-nums tracking-tight ml-2">
+                    $
+                    {awaitingClearanceAmount.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </span>
+                </div>
+              }
+              <DropdownMenuSeparator />
+              {role === "advertiser" ?
+                <>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-sm"
+                    onClick={onWalletClick}>
+
+                    <ArrowDownCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    Deposit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-sm"
+                    onClick={onWalletClick}>
+
+                    <ArrowUpCircleIcon className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    Withdrawal
+                  </DropdownMenuItem>
+                </> :
+
+                <>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-sm"
+                    onClick={onWalletClick}>
+
+                    <ArrowUpCircleIcon className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    Withdrawal
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-sm"
+                    onClick={onPaymentAccountsClick}>
+
+                    <CreditCardIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    Payment Accounts
+                  </DropdownMenuItem>
+                </>
+              }
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer gap-2 text-sm text-muted-foreground"
+                onClick={onWalletClick}>
+
+                <ClockIcon className="w-4 h-4 flex-shrink-0" />
+                Transaction History
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex items-center gap-1 sm:gap-2 bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground px-1 sm:px-2">
+
+                <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
+                  <AvatarImage
+                    src="https://c.animaapp.com/mhmjm5e0FqIvyc/img/ai_2.png"
+                    alt="User avatar profile" />
+
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:inline text-sm font-normal text-foreground">
+                  {user?.fullName || 'John Doe'}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56 bg-popover text-popover-foreground">
+
+              <DropdownMenuItem
+                className="text-popover-foreground cursor-pointer py-2.5"
+                onClick={onProfileClick}>
+
+                <UserIcon className="w-4 h-4 mr-2" />
+                Personal profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-popover-foreground cursor-pointer py-2.5">
+                <GlobeIcon className="w-4 h-4 mr-2" />
+                Language
+                <span className="ml-auto text-xs text-muted-foreground">
+                  English
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-popover-foreground cursor-pointer py-2.5"
+                onClick={handleRoleSwitch}>
+
+                <RepeatIcon className="w-4 h-4 mr-2" />
+                Switch to {role === "advertiser" ? "publisher" : "advertiser"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-muted-foreground cursor-pointer py-2.5"
+                onClick={handleLogout}
+              >
+                <LogOutIcon className="w-4 h-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>);
+
+}

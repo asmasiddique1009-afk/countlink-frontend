@@ -1,0 +1,24 @@
+{
+  "name": "PostBridge — Guest Post & Link Building Marketplace",
+  "short_name": "PostBridge",
+  "description": "Buy and sell guest posts, sponsored content, and link placements on high-authority websites.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

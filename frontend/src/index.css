@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 210 15% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 210 15% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 10%;
+    
+    --primary: 245 75% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 245 55% 75%;
+    --secondary-foreground: 245 80% 20%;
+    
+    --tertiary: 210 60% 65%;
+    --tertiary-foreground: 0 0% 100%;
+    
+    --neutral: 0 0% 98%;
+    --neutral-foreground: 210 15% 10%;
+    
+    --muted: 0 0% 96%;
+    --muted-foreground: 210 5% 45%;
+    
+    --accent: 0 0% 96%;
+    --accent-foreground: 210 15% 10%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 155 55% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 15 85% 55%;
+    --warning-foreground: 0 0% 100%;
+    
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 245 80% 40%;
+    
+    --radius: 12px;
+    
+    --gray-50: 0 0% 98%;
+    --gray-100: 0 0% 96%;
+    --gray-200: 0 0% 90%;
+    --gray-300: 0 0% 80%;
+    --gray-400: 0 0% 65%;
+    --gray-500: 0 0% 50%;
+    --gray-600: 0 0% 40%;
+    --gray-700: 0 0% 30%;
+    --gray-800: 0 0% 20%;
+    --gray-900: 0 0% 10%;
+  }
+  
+  .dark {
+    --background: 210 15% 10%;
+    --foreground: 0 0% 98%;
+    
+    --card: 210 15% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 210 15% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 245 75% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 245 55% 75%;
+    --secondary-foreground: 245 80% 20%;
+    
+    --tertiary: 210 60% 65%;
+    --tertiary-foreground: 0 0% 100%;
+    
+    --neutral: 210 15% 15%;
+    --neutral-foreground: 0 0% 98%;
+    
+    --muted: 210 15% 15%;
+    --muted-foreground: 210 5% 65%;
+    
+    --accent: 210 15% 15%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 155 55% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 15 85% 55%;
+    --warning-foreground: 0 0% 100%;
+    
+    --border: 210 15% 20%;
+    --input: 210 15% 20%;
+    --ring: 245 80% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html,
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-foreground;
+  }
+  
+  p, span, div, a {
+    @apply text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  @keyframes zoom-in {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-in.zoom-in {
+    animation: zoom-in 0.3s ease-out;
+  }
+}
