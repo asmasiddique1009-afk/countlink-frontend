@@ -1,38 +1,37 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    // ─── Basic Info ───────────────────────────────────────
     fullName: {
       type: String,
-      required: [true, 'Full name is required'],
+      required: [true, "Full name is required"],
       trim: true,
     },
 
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
 
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
- required: true,
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be at least 8 characters"],
+      required: true,
     },
 
     role: {
       type: String,
       enum: {
-        values: ['advertiser', 'publisher'],
-        message: 'Role must be either advertiser or publisher',
+        values: ["advertiser", "publisher"],
+        message: "Role must be either advertiser or publisher",
       },
-      default: 'advertiser',
+      default: "advertiser",
     },
 
     avatar: {
@@ -40,9 +39,10 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    isActive: {
-      type: Boolean,
-      default: true,
+    status: {
+      type: String,
+      enum: ["approved", "pending_verification", "suspended", "deactivated"],
+      default: "pending_verification",
     },
 
     // ─── Personal Info ────────────────────────────────────
@@ -53,17 +53,17 @@ const userSchema = new mongoose.Schema(
 
     phoneCode: {
       type: String,
-      default: '+1',
+      default: "+1",
     },
 
     timezone: {
       type: String,
-      default: 'utc-5',
+      default: "utc-5",
     },
 
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
     },
 
     // ─── Wallet ───────────────────────────────────────────
@@ -82,13 +82,16 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
-
     // ─── Payment Methods ──────────────────────────────────
     paymentMethods: [
       {
-        type:      { type: String, enum: ['paypal', 'crypto', 'bank'], required: true },
-        label:     { type: String },          // e.g. "PayPal", "USDT Wallet"
-        value:     { type: String },          // email or wallet address
+        type: {
+          type: String,
+          enum: ["paypal", "crypto", "bank"],
+          required: true,
+        },
+        label: { type: String }, // e.g. "PayPal", "USDT Wallet"
+        value: { type: String }, // email or wallet address
         isDefault: { type: Boolean, default: false },
       },
     ],
@@ -129,14 +132,13 @@ const userSchema = new mongoose.Schema(
     // ─── Membership ───────────────────────────────────────
     membershipTier: {
       type: String,
-      enum: ['free', 'premium', 'enterprise'],
-      default: 'free',
+      enum: ["free", "premium", "enterprise"],
+      default: "free",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

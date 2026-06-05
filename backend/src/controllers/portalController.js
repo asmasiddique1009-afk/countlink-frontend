@@ -24,7 +24,11 @@ const createWebsite = async (req, res) => {
       enableCopywriting,
       discount,
     } = req.body;
-
+    console.log(
+      "Received website creation request with data:",
+      req.user?.id,
+      req.body,
+    );
     const website = await Website.create({
       userId: req.user?.id,
       websiteUrl,
@@ -47,7 +51,6 @@ const createWebsite = async (req, res) => {
       priceCopywriting,
       enableCopywriting,
       discount,
-      status: "pending_review",
     });
 
     res.status(201).json({
@@ -62,11 +65,10 @@ const createWebsite = async (req, res) => {
     });
   }
 };
-// GET /api/websites
+
 const getWebsites = async (req, res) => {
   try {
-    const websites = await Website.find({ userId: req.user?.id })
-      .sort({ createdAt: -1 });
+    const websites = await Website.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -77,122 +79,49 @@ const getWebsites = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-// GET /api/websites/:id/stats
-const getWebsiteStats = async (req, res) => {
-  try {
-    const orders = await Order.aggregate([
-      { $match: { websiteId: req.params.id } },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          totalEarnings: { $sum: "$price" }
-        }
-      }
-    ]);
 
-    const stats = {
-      inProgress: 0,
-      published: 0,
-      requests: 0,
-      totalEarnings: 0,
-      clearedEarnings: 0,
-      pendingEarnings: 0,
-    };
-
-    orders.forEach(order => {
-      if (order._id === "in_progress") stats.inProgress = order.count;
-      if (order._id === "published") {
-        stats.published = order.count;
-        stats.totalEarnings += order.totalEarnings;
-      }
-      if (order._id === "pending") stats.requests = order.count;
-    });
-
-    res.status(200).json({ success: true, stats });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-// GET /api/dashboard
-const getDashboardData = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-
-    const [websites, earnings, recentOrders] = await Promise.all([
-      Website.find({ userId }),
-
-      Earning.aggregate([
-        { $match: { userId } },
-        {
-          $group: {
-            _id: "$status",
-            total: { $sum: "$amount" }
-          }
-        }
-      ]),
-
-      Order.find({ sellerId: userId })
-        .sort({ createdAt: -1 })
-        .limit(10)
-        .populate("websiteId", "websiteUrl"),
-    ]);
-
-    const earningsSummary = {
-      cleared: 0,
-      pending: 0,
-    };
-    earnings.forEach(e => {
-      if (e._id === "cleared") earningsSummary.cleared = e.total;
-      if (e._id === "pending") earningsSummary.pending = e.total;
-    });
-    earningsSummary.total = earningsSummary.cleared + earningsSummary.pending;
-
-    res.status(200).json({
-      success: true,
-      data: {
-        websites,
-        earnings: earningsSummary,
-        recentOrders,
-        totalWebsites: websites.length,
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
 const updateWebsite = async (req, res) => {
   try {
-    const website = await Website.findOne({
-      _id: req.params.id,
-      userId: req.user?.id, // ensure user owns this website
-    });
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    // 1. Find the website and ensure it belongs to the logged-in user
+    const website = await Website.findOne({ _id: id, userId });
 
     if (!website) {
       return res.status(404).json({
         success: false,
-        message: "Website not found",
+        message: "Website not found or unauthorized access",
       });
     }
 
+    // 2. Prevent overriding sensitive fields (Security Best Practice)
+    // Sirf wahi fields update karein jo allowed hain
+    const updateData = { ...req.body };
+    delete updateData.userId; // User apna userId change nahi kar sakta
+    delete updateData._id;    // ID change nahi honi chahiye
+    
+    // 3. Mark as pending for re-review
+    updateData.status = "pending";
+
+    // 4. Update the website
     const updatedWebsite = await Website.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        status: "pending_review", // re-review after update (optional)
-      },
+      id,
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
     res.status(200).json({
       success: true,
-      message: "Website updated successfully",
+      message: "Website updated successfully and sent for review",
       website: updatedWebsite,
     });
   } catch (err) {
+    console.error("Update Website Error:", err);
     res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Server error during update",
+      error: err.message,
     });
   }
 };
@@ -221,7 +150,7 @@ const deleteWebsite = async (req, res) => {
     });
   }
 };
-// GET /api/websites/:id
+
 const getWebsiteById = async (req, res) => {
   try {
     const website = await Website.findOne({
@@ -247,4 +176,53 @@ const getWebsiteById = async (req, res) => {
     });
   }
 };
-module.exports = { createWebsite,getWebsites,getWebsiteStats,getDashboardData,updateWebsite,deleteWebsite,getWebsiteById };
+const updateWebsiteStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["active", "pending", "rejected", "paused"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
+    }
+
+    const website = await Website.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true },
+    );
+
+    if (!website) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Website not found" });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Website status updated", website });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+const getWebsitesbystatus = async (req, res) => {
+  const { status } = req.params;
+  try {
+    const websites = await Website.find({ status });
+
+    res.status(200).json({ success: true, count: websites.length, websites });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = {
+  createWebsite,
+  getWebsites,
+  updateWebsite,
+  deleteWebsite,
+  getWebsiteById,
+  updateWebsiteStatus,
+  getWebsitesbystatus,
+};

@@ -5,7 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-
+const { Server } = require("socket.io");
 const connectDB = require('./src/config/database');
 const authRoutes = require('./src/routes/authRoutes');
 const portalRoutes = require('./src/routes/portalRoutes');
@@ -14,15 +14,21 @@ const userRoutes = require('./src/routes/userRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const userProfileSettingRoute = require('./src/routes/profileSettingsRoutes');
 const projectRoutes = require('./src/routes/projectRoutes');
+const messageRoutes = require("./src/routes/messageRoutes")
+const dashboardRoutes = require("./src/routes/dashboardRoutes")
 const errorHandler = require('./src/middleware/errorHandler');
+const { app, server, io } = require('./src/config/socket');
 const fs = require('fs');
 
 const path = require('path');
-const app = express();
+
 // ✅ Body Parser Middleware (IMPORTANT)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
+app.use((req, res, next) => {
+  req.io = io; // Now 'io' is available as 'req.io' in all controllers
+  next();
+});
 // CORS
 app.use(cors());
 // ─── Connect to MongoDB ────────────────────────────────────────────────────
@@ -83,6 +89,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use("/api/userProfileSettings", userProfileSettingRoute);
 app.use("/api/projects", require("./src/routes/projectRoutes"));
+app.use("/api/messages",messageRoutes);
+app.use("/api/dashboard",dashboardRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -96,11 +104,11 @@ app.use(errorHandler);
 
 // ─── Start Server ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 server  running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`\n🚀 Server running on port ${PORT}`);
 });
 
-// Handle unhandled promise rejections
+
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err.message);
   server.close(() => process.exit(1));

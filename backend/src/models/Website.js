@@ -38,11 +38,11 @@ const websiteSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["draft", "pending_review", "approved", "paused"],
-      default: "pending_review",
+      enum: ["active", "pending", "rejected", "paused"],
+      default: "pending",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Website", websiteSchema);
